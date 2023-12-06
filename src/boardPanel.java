@@ -89,6 +89,11 @@ public class boardPanel extends JPanel{
              */
             if(board.isBomb(x, y)){
                 tileLabel.setText("B");
+                for (Component c : boardPanel.this.getComponents()){
+                    for (MouseListener l : c.getMouseListeners()){
+                        c.removeMouseListener(l);
+                    }
+                }
             }
             else if (e.getButton() == 1){
                 tileLabel.setText(board.checkAdjacency(x, y) +"");
