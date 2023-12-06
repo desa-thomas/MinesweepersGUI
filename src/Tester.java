@@ -7,6 +7,7 @@ public class Tester {
 
         Minesweeper minesweeper = new Minesweeper(10,10,10);
         Scanner in = new Scanner(System.in);
+        minesweeper.printBoard();
 
         JFrame frame = new JFrame();
         JPanel boardP = new boardPanel(minesweeper);

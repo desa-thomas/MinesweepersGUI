@@ -103,8 +103,10 @@ public class Minesweeper {
         2. If tile is adjacent to bomb(s) put the number of bombs its adjacent to
         3. If tile is not adjacent to any bomb, keep revealing adjacent tiles until there are no more adjacent tiles
            with no adjacent bombs
+
+       EDIT: changed to public because boardPanel needs to access it
      */
-    private int revealTile(int x, int y){
+    public int revealTile(int x, int y){
         int tile = -900;
 
         //if tile isn't bomb
@@ -116,10 +118,6 @@ public class Minesweeper {
                 revealedTiles += 1;
                 gameBoard[x][y] = "["+adj+"]";
                 tile = adj;
-
-                //fire property change
-                this.pcs.firePropertyChange(COORDINATE_REVEALED, x, y);
-
             }
             else{
                 recursiveReveal(x,y);
@@ -141,10 +139,9 @@ public class Minesweeper {
         int ttlAdjacent = -1;
 
         if(validCoords(x, y)) {
-
-            if (board[x][y].equals("[B]")) System.err.println("Can't check adjacency of bomb");
-
-
+            if (board[x][y].equals("[B]")) {
+                System.err.println("Can't check adjacency of bomb");
+            }
             else {
                 ttlAdjacent = 0;
                 for (int xIncrement = -1; xIncrement <= 1; xIncrement++) {
@@ -169,8 +166,12 @@ public class Minesweeper {
         revealedTiles += 1;
         gameBoard[x][y] = "   ";
         int adj;
-        //fire property change
+
+        //fire property change-------------------------------
         this.pcs.firePropertyChange(COORDINATE_REVEALED, x,y);
+        if(x == y)
+            this.pcs.firePropertyChange(DIAGONAL, x, 0);
+        //---------------------------------------------------
 
         //check adjacency for all tiles adjacent to it
         for(int xIncrement = -1; xIncrement <= 1; xIncrement++){
@@ -187,12 +188,20 @@ public class Minesweeper {
 
                     //if tile has not been checked already
                     if(gameBoard[adjX][adjY].equals("[ ]")) {
+
+                        //fire property change----------------------------------------
+                        this.pcs.firePropertyChange(COORDINATE_REVEALED, adjX, adjY);
+                        if(adjX == adjY)
+                            this.pcs.firePropertyChange(DIAGONAL, adjX, 0);
+                        //-----------------------------------------------------------
+
                         revealedTiles += 1;
-                        this.pcs.firePropertyChange(COORDINATE_REVEALED, x, y);
                     }
+
                     gameBoard[adjX][adjY] = "[" + adj + "]";
 
                 }
+                //if tile has not already been checked and has adj = 0
                 else if (!gameBoard[adjX][adjY].equals("   ")){
                     recursiveReveal(adjX, adjY);
                 }
@@ -402,14 +411,17 @@ public class Minesweeper {
     public int getWidth(){return width;}
     public int getLength(){return length;}
     public int getMINES(){return MINES;}
+    public boolean isBomb(int x, int y){
+        return board[x][y].equals("[B]");
+    }
 
     /*
-    list containing coordinates in string format "x y" where
-    1 <= x <= length
-    1 <= y <= width
-    to be fired as property changes whenever a tile is revealed
+    Property change to be fired only in recursive reveal
      */
     public static String COORDINATE_REVEALED = "COORDINATE_REVEALED";
+    //Property change if coordinates lie on diagonal
+    public static String DIAGONAL = "DIAGONAL";
+
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
     /*
@@ -423,9 +435,6 @@ public class Minesweeper {
         this.pcs.addPropertyChangeListener(propertyName, listener);
     }
 
-    /*
-    helper method,,, fills COORDINATE_REVELAED with all possible coordinates
-     */
 
 
 }
